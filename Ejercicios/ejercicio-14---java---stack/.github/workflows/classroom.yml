@@ -1,0 +1,71 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example
+      id: test-example
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase1"
+        timeout: 2
+        max-score: 20
+    - name: Test true
+      id: test-true
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test true
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase2"
+        timeout: 2
+        max-score: 20
+    - name: Test false
+      id: test-false
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test false
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase3"
+        timeout: 2
+        max-score: 20
+    - name: Test Big Structure
+      id: test-big-structure
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Big Structure
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase4"
+        timeout: 2
+        max-score: 20
+    - name: Test Big Structure 2
+      id: test-big-structure-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Big Structure 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase5"
+        timeout: 2
+        max-score: 20
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE_RESULTS: "${{steps.test-example.outputs.result}}"
+        TEST-TRUE_RESULTS: "${{steps.test-true.outputs.result}}"
+        TEST-FALSE_RESULTS: "${{steps.test-false.outputs.result}}"
+        TEST-BIG-STRUCTURE_RESULTS: "${{steps.test-big-structure.outputs.result}}"
+        TEST-BIG-STRUCTURE-2_RESULTS: "${{steps.test-big-structure-2.outputs.result}}"
+      with:
+        runners: test-example,test-true,test-false,test-big-structure,test-big-structure-2

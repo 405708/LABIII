@@ -1,0 +1,71 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example
+      id: test-example
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase1"
+        timeout: 2
+        max-score: 20
+    - name: Test Simple
+      id: test-simple
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Simple
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase2"
+        timeout: 2
+        max-score: 20
+    - name: Test Empty
+      id: test-empty
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Empty
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase3"
+        timeout: 2
+        max-score: 20
+    - name: Test All
+      id: test-all
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test All
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase4"
+        timeout: 2
+        max-score: 20
+    - name: Test Override
+      id: test-override
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Override
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase5"
+        timeout: 2
+        max-score: 20
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE_RESULTS: "${{steps.test-example.outputs.result}}"
+        TEST-SIMPLE_RESULTS: "${{steps.test-simple.outputs.result}}"
+        TEST-EMPTY_RESULTS: "${{steps.test-empty.outputs.result}}"
+        TEST-ALL_RESULTS: "${{steps.test-all.outputs.result}}"
+        TEST-OVERRIDE_RESULTS: "${{steps.test-override.outputs.result}}"
+      with:
+        runners: test-example,test-simple,test-empty,test-all,test-override

@@ -1,0 +1,81 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Example Test
+      id: example-test
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Example Test
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase1"
+        timeout: 2
+        max-score: 10
+    - name: Simple Test
+      id: simple-test
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Simple Test
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase2"
+        timeout: 2
+        max-score: 20
+    - name: Test Delete
+      id: test-delete
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Delete
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase3"
+        timeout: 2
+        max-score: 20
+    - name: Test Delete 2
+      id: test-delete-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Delete 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase4"
+        timeout: 2
+        max-score: 20
+    - name: Test Border
+      id: test-border
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Border
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase5"
+        timeout: 2
+        max-score: 15
+    - name: Test Border 2
+      id: test-border-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Border 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase6"
+        timeout: 2
+        max-score: 15
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        EXAMPLE-TEST_RESULTS: "${{steps.example-test.outputs.result}}"
+        SIMPLE-TEST_RESULTS: "${{steps.simple-test.outputs.result}}"
+        TEST-DELETE_RESULTS: "${{steps.test-delete.outputs.result}}"
+        TEST-DELETE-2_RESULTS: "${{steps.test-delete-2.outputs.result}}"
+        TEST-BORDER_RESULTS: "${{steps.test-border.outputs.result}}"
+        TEST-BORDER-2_RESULTS: "${{steps.test-border-2.outputs.result}}"
+      with:
+        runners: example-test,simple-test,test-delete,test-delete-2,test-border,test-border-2
