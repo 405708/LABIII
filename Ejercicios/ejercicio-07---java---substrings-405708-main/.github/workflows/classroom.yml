@@ -1,0 +1,91 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example
+      id: test-example
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase1"
+        timeout: 2
+        max-score: 10
+    - name: Test Simple
+      id: test-simple
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Simple
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase2"
+        timeout: 2
+        max-score: 10
+    - name: Test all text
+      id: test-all-text
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test all text
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase3"
+        timeout: 2
+        max-score: 10
+    - name: Test First letter
+      id: test-first-letter
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test First letter
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase4"
+        timeout: 2
+        max-score: 10
+    - name: Test last letter
+      id: test-last-letter
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test last letter
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase5"
+        timeout: 2
+        max-score: 10
+    - name: Test White
+      id: test-white
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test White
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase6"
+        timeout: 2
+        max-score: 25
+    - name: Test White 2
+      id: test-white-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test White 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase7"
+        timeout: 2
+        max-score: 25
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE_RESULTS: "${{steps.test-example.outputs.result}}"
+        TEST-SIMPLE_RESULTS: "${{steps.test-simple.outputs.result}}"
+        TEST-ALL-TEXT_RESULTS: "${{steps.test-all-text.outputs.result}}"
+        TEST-FIRST-LETTER_RESULTS: "${{steps.test-first-letter.outputs.result}}"
+        TEST-LAST-LETTER_RESULTS: "${{steps.test-last-letter.outputs.result}}"
+        TEST-WHITE_RESULTS: "${{steps.test-white.outputs.result}}"
+        TEST-WHITE-2_RESULTS: "${{steps.test-white-2.outputs.result}}"
+      with:
+        runners: test-example,test-simple,test-all-text,test-first-letter,test-last-letter,test-white,test-white-2

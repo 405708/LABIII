@@ -1,0 +1,61 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example
+      id: test-example
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase1"
+        timeout: 2
+        max-score: 10
+    - name: Test Border 0
+      id: test-border-0
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Border 0
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase2"
+        timeout: 2
+        max-score: 30
+    - name: Test Simple
+      id: test-simple
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Simple
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase3"
+        timeout: 2
+        max-score: 20
+    - name: Test Full
+      id: test-full
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Full
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase4"
+        timeout: 2
+        max-score: 40
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE_RESULTS: "${{steps.test-example.outputs.result}}"
+        TEST-BORDER-0_RESULTS: "${{steps.test-border-0.outputs.result}}"
+        TEST-SIMPLE_RESULTS: "${{steps.test-simple.outputs.result}}"
+        TEST-FULL_RESULTS: "${{steps.test-full.outputs.result}}"
+      with:
+        runners: test-example,test-border-0,test-simple,test-full

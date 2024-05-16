@@ -1,0 +1,51 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example 0
+      id: test-example-0
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example 0
+        setup-command: ''
+        command: mvn test -Dtest="AnagramsHandlerTest#testCase1"
+        timeout: 1
+        max-score: 30
+    - name: Test Example 1
+      id: test-example-1
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example 1
+        setup-command: ''
+        command: mvn test -Dtest="AnagramsHandlerTest#testCase2"
+        timeout: 1
+        max-score: 30
+    - name: Test Example 2
+      id: test-example-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example 2
+        setup-command: ''
+        command: mvn test -Dtest="AnagramsHandlerTest#testCase3"
+        timeout: 1
+        max-score: 40
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE-0_RESULTS: "${{steps.test-example-0.outputs.result}}"
+        TEST-EXAMPLE-1_RESULTS: "${{steps.test-example-1.outputs.result}}"
+        TEST-EXAMPLE-2_RESULTS: "${{steps.test-example-2.outputs.result}}"
+      with:
+        runners: test-example-0,test-example-1,test-example-2

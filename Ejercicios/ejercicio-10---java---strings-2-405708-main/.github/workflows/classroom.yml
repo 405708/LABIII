@@ -1,0 +1,101 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example
+      id: test-example
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase1"
+        timeout: 2
+        max-score: 10
+    - name: Test Example 2
+      id: test-example-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase2"
+        timeout: 2
+        max-score: 10
+    - name: Test positivo 1
+      id: test-positivo-1
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test positivo 1
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase3"
+        timeout: 2
+        max-score: 15
+    - name: Test positivo 2
+      id: test-positivo-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test positivo 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase4"
+        timeout: 2
+        max-score: 15
+    - name: Test positivo 3
+      id: test-positivo-3
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test positivo 3
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase5"
+        timeout: 2
+        max-score: 10
+    - name: Test negativo 1
+      id: test-negativo-1
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test negativo 1
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase6"
+        timeout: 2
+        max-score: 10
+    - name: Test negativo 2
+      id: test-negativo-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test negativo 2
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase7"
+        timeout: 2
+        max-score: 15
+    - name: Test negativo 3
+      id: test-negativo-3
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test negativo 3
+        setup-command: ''
+        command: mvn test -Dtest="AppTest#testCase8"
+        timeout: 2
+        max-score: 15
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE_RESULTS: "${{steps.test-example.outputs.result}}"
+        TEST-EXAMPLE-2_RESULTS: "${{steps.test-example-2.outputs.result}}"
+        TEST-POSITIVO-1_RESULTS: "${{steps.test-positivo-1.outputs.result}}"
+        TEST-POSITIVO-2_RESULTS: "${{steps.test-positivo-2.outputs.result}}"
+        TEST-POSITIVO-3_RESULTS: "${{steps.test-positivo-3.outputs.result}}"
+        TEST-NEGATIVO-1_RESULTS: "${{steps.test-negativo-1.outputs.result}}"
+        TEST-NEGATIVO-2_RESULTS: "${{steps.test-negativo-2.outputs.result}}"
+        TEST-NEGATIVO-3_RESULTS: "${{steps.test-negativo-3.outputs.result}}"
+      with:
+        runners: test-example,test-example-2,test-positivo-1,test-positivo-2,test-positivo-3,test-negativo-1,test-negativo-2,test-negativo-3

@@ -1,0 +1,121 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Example
+      id: test-example
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Example
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase1"
+        timeout: 2
+        max-score: 10
+    - name: 'Test CamelCase '
+      id: test-camelcase
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: 'Test CamelCase '
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase2"
+        timeout: 2
+        max-score: 10
+    - name: Test length
+      id: test-length
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test length
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase3"
+        timeout: 2
+        max-score: 10
+    - name: Test Length 2
+      id: test-length-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Length 2
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase4"
+        timeout: 2
+        max-score: 10
+    - name: Test short
+      id: test-short
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test short
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase5"
+        timeout: 2
+        max-score: 10
+    - name: Test Alphabet
+      id: test-alphabet
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Alphabet
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase6"
+        timeout: 2
+        max-score: 10
+    - name: Test Alphabet 2
+      id: test-alphabet-2
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Alphabet 2
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase7"
+        timeout: 2
+        max-score: 10
+    - name: Test Alphabet 3
+      id: test-alphabet-3
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Alphabet 3
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase8"
+        timeout: 2
+        max-score: 10
+    - name: Test Alphabet 4
+      id: test-alphabet-4
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Alphabet 4
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase9"
+        timeout: 2
+        max-score: 10
+    - name: Test Alphabet 5
+      id: test-alphabet-5
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test Alphabet 5
+        setup-command: ''
+        command: mvn test -Dtest="SubStringHandlerTest#testCase10"
+        timeout: 2
+        max-score: 10
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-EXAMPLE_RESULTS: "${{steps.test-example.outputs.result}}"
+        TEST-CAMELCASE_RESULTS: "${{steps.test-camelcase.outputs.result}}"
+        TEST-LENGTH_RESULTS: "${{steps.test-length.outputs.result}}"
+        TEST-LENGTH-2_RESULTS: "${{steps.test-length-2.outputs.result}}"
+        TEST-SHORT_RESULTS: "${{steps.test-short.outputs.result}}"
+        TEST-ALPHABET_RESULTS: "${{steps.test-alphabet.outputs.result}}"
+        TEST-ALPHABET-2_RESULTS: "${{steps.test-alphabet-2.outputs.result}}"
+        TEST-ALPHABET-3_RESULTS: "${{steps.test-alphabet-3.outputs.result}}"
+        TEST-ALPHABET-4_RESULTS: "${{steps.test-alphabet-4.outputs.result}}"
+        TEST-ALPHABET-5_RESULTS: "${{steps.test-alphabet-5.outputs.result}}"
+      with:
+        runners: test-example,test-camelcase,test-length,test-length-2,test-short,test-alphabet,test-alphabet-2,test-alphabet-3,test-alphabet-4,test-alphabet-5
