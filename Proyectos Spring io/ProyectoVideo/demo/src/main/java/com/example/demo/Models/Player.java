@@ -1,5 +1,6 @@
 package com.example.demo.Models;
 
+import com.example.demo.Utils.Validations.password.ValidPassword;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
@@ -23,6 +24,7 @@ public class Player {
     String userName;
 
     @NotNull(message = "Password no puede estar vacia")
+    @ValidPassword  //Anotacion generada por nosotros
     String password;
 
     @NotNull(message = "Email no puede estar vacio")
