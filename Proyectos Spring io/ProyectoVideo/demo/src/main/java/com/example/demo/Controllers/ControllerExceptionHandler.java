@@ -25,11 +25,22 @@ public class ControllerExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorApi> handleError(IllegalArgumentException exception) {
+    public ResponseEntity<ErrorApi> handleError(MethodArgumentNotValidException exception) {
         ErrorApi error = buildError(exception.getMessage(), HttpStatus.BAD_REQUEST);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorApi> handleError(ResponseStatusException exception) {
+        ErrorApi error = buildError(exception.getReason(), HttpStatus.valueOf(exception.getStatusCode().value()));
+        return ResponseEntity.status(exception.getStatusCode()).body(error);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorApi> handleError(EntityNotFoundException exception){
+        ErrorApi error = buildError(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 
     private ErrorApi buildError(String message, HttpStatus status) {
         return ErrorApi.builder()

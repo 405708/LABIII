@@ -5,9 +5,13 @@ import com.example.demo.Entities.PlayerEntity;
 import com.example.demo.Models.Player;
 import com.example.demo.Repositories.PlayerJpaRepository;
 import com.example.demo.Services.PlayerService;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -20,14 +24,24 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Player getPlayerById(Long id) {
         PlayerEntity playerEntity = playerJpaRepository.getReferenceById(id);
+        if(Objects.isNull(playerEntity.getUsername()))
+        {
+            throw new EntityNotFoundException();
+        }
         Player player = modelMapper.map(playerEntity, Player.class);
         return player;
     }
 
     @Override
     public Player savePlayer(Player player) { //Mapeamos el player a entity, guardamos en db y volvemos a Player para devolverlo
-        PlayerEntity playerEntity = modelMapper.map(player, PlayerEntity.class);
-        PlayerEntity playerEntitySaved = playerJpaRepository.save(playerEntity);
-        return modelMapper.map(playerEntitySaved, Player.class);
+        Optional<PlayerEntity> playerEntityOptional = playerJpaRepository.findByUsernameOrEmail(
+                player.getUserName(), player.getEmail());
+        if(playerEntityOptional.isEmpty())
+        {
+            PlayerEntity playerEntity = modelMapper.map(player, PlayerEntity.class);
+            PlayerEntity playerEntitySaved = playerJpaRepository.save(playerEntity);
+            return modelMapper.map(playerEntitySaved, Player.class);
+        }
+        else return null;
     }
 }
