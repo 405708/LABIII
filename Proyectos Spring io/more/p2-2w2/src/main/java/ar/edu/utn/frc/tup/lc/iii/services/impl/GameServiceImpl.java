@@ -11,6 +11,7 @@ import ar.edu.utn.frc.tup.lc.iii.repositories.GameResultRepository;
 import ar.edu.utn.frc.tup.lc.iii.services.GameService;
 import ar.edu.utn.frc.tup.lc.iii.services.ScoreService;
 import ar.edu.utn.frc.tup.lc.iii.services.UserService;
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +102,7 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public GameResult setGameResultByGameId(Long gameId, Integer localGolas, Integer visitorGoals) {
-        // TODO 5 - Registro de resultados partidos: El sistema deberá permitir a un administrador ingresar los resultados reales de
+        // TODO(Completado) 5 - Registro de resultados partidos: El sistema deberá permitir a un administrador ingresar los resultados reales de
         //   los partidos de la fase de grupos de la Copa América 2024. Adicionalmente debe permitir modificar los resultados de
         //   los resultados de los partidos en caso de ser necesario.
         // 1. Get the result of the game by game id
@@ -112,9 +113,30 @@ public class GameServiceImpl implements GameService {
         // 3. If the result exists, update the result with the given data and save it
         // 4. Calculate the score of the predictions of the game calling the method this.calculateScore(gameResult)
         // 5. Return the result
-        
 
-        return null;
+        GameResultEntity gameResultEntity = gameResultRepository.findByGameId(gameId);
+        GameEntity gameEntity = gameRepository.getReferenceById(gameId);
+        GameResult gameResult = new GameResult();
+        if (Objects.isNull(gameEntity)) {
+            throw new HttpClientErrorException(HttpStatus.valueOf(400), "Game no existe");
+        }
+        else
+        {
+            gameResult.setId(gameId);
+            gameResult.setLocalGoals(localGolas);
+            gameResult.setVisitorGoals(visitorGoals);
+            gameResult.setGame(modelMapper.map(gameEntity, Game.class));
+            gameResult.setResult(this.calculateResult(localGolas, visitorGoals));
+            GameResultEntity gameResultEntityToSave = modelMapper.map(gameResult, GameResultEntity.class);
+            gameResultRepository.save(gameResultEntityToSave);
+        }
+        if (Objects.nonNull(gameResultEntity)) {
+            gameResult.setId(gameResultEntity.getId());
+            gameResultRepository.save(modelMapper.map(gameResult, GameResultEntity.class));
+        }
+
+        this.calculateScore(gameResult);
+        return gameResult;
     }
 
     /**
@@ -144,13 +166,12 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public GamePrediction predict(Long userId, Long gameId, Integer localGoals, Integer visitorGoals) {
-        // TODO 1 - Carga de pronósticos: El sistema debe permitir a los jugadores ingresar sus pronósticos
+        // TODO(Completado) 1 - Carga de pronósticos: El sistema debe permitir a los jugadores ingresar sus pronósticos
         //  para los partidos de la fase de grupos de la Copa América 2024. Para ello, deberá solicitar
         //  al usuario que ingrese el resultado de cada partido indicando los goles que se darán por cada equipo.
         //  Los pronósticos deberán ser ingresados antes del inicio de cada partido. El sistema deberá validar
         //  que los pronósticos ingresados sean válidos y que no se ingresen pronósticos para partidos que ya
         //  se hayan iniciado y que la cantidad de goles ingresados sea un entero positivo o cero.
-
         // 1. Get the user by id and check if it exists
         // 1.a If the user does not exist, throw a HttpClientErrorException with status code 400 and message "User does not exist"
         // 2. Get the game by id and check if it exists
@@ -162,7 +183,40 @@ public class GameServiceImpl implements GameService {
         // 6. Save the prediction
         // 7. Return the prediction
 
-        return null;
+        User user = userService.getUserById(userId);
+        if (Objects.isNull(user)) {
+            throw new HttpClientErrorException(HttpStatus.valueOf(400), "User no existe");
+        }
+        GameEntity game = (GameEntity) Hibernate.unproxy(gameRepository.getReferenceById(gameId));
+        if (Objects.isNull(game)) {
+            throw new HttpClientErrorException(HttpStatus.valueOf(400), "Game no existe");
+        }
+       if (game.getGameDate().isBefore(LocalDateTime.now())) {
+            throw new HttpClientErrorException(HttpStatus.valueOf(400), "El game ya inicio");
+        }
+       Optional<GamePredictionEntity> gamePredictionEntityOptional = gamePredictionRepository.findByUserIdAndGameId(userId, gameId);
+       GamePrediction gamePrediction = new GamePrediction();
+        if (gamePredictionEntityOptional.isEmpty()) {
+            gamePrediction.setGame(modelMapper.map(game, Game.class));
+            gamePrediction.setUser(user);
+            gamePrediction.setVisitorGoals(visitorGoals);
+            gamePrediction.setLocalGoals(localGoals);
+            gamePrediction.setPredictionDate(LocalDateTime.now());
+            gamePrediction.setResult(calculateResult(localGoals, visitorGoals));
+        }
+        else
+        {
+            gamePrediction.setId(gamePredictionEntityOptional.get().getId());
+            gamePrediction.setGame(modelMapper.map(game, Game.class));
+            gamePrediction.setUser(user);
+            gamePrediction.setVisitorGoals(visitorGoals);
+            gamePrediction.setLocalGoals(localGoals);
+            gamePrediction.setPredictionDate(LocalDateTime.now());
+            gamePrediction.setResult(calculateResult(localGoals, visitorGoals));
+        }
+
+        GamePredictionEntity gamePredictionEntitySaved = gamePredictionRepository.save(modelMapper.map(gamePrediction, GamePredictionEntity.class));
+        return modelMapper.map(gamePredictionEntitySaved, GamePrediction.class);
     }
 
     /**
@@ -281,15 +335,20 @@ public class GameServiceImpl implements GameService {
      * @param gameResult the result of the game
      */
     private void calculateScore(GameResult gameResult) {
-        // TODO 2 - Cálculo de puntajes: El sistema deberá calcular los puntajes de los usuarios en base a los resultados reales de
+        // TODO(Completado) 2 - Cálculo de puntajes: El sistema deberá calcular los puntajes de los usuarios en base a los resultados reales de
         //   los partidos. Para ello, deberá comparar los pronósticos de los usuarios con los resultados reales y asignar puntos
         //   según la precisión de las predicciones. Los puntajes se calcularán cada vez que el administrador cargue o modifique
         //   el resultado de un partido. Los puntajes se asignarán de la siguiente manera:
         //   - 1 punto por acertar el resultado de un partido.
         //   - 3 puntos adicionales por acertar el resultado exacto de un partido.
-
         // 1. Get the predictions of the game with the method this.getPredictionsByGame(gameResult.getGame().getId())
         // 2. For each prediction, calculate the score with the method scoreService.calculateScore(gamePrediction, gameResult)
+
+        this.getPredictionsByGame(gameResult.getGame().getId());
+        List<GamePrediction> listGamePredictions = this.getPredictionsByGame(gameResult.getGame().getId());
+        for (GamePrediction gamePrediction : listGamePredictions) {
+            scoreService.calculateScore(gamePrediction, gameResult);
+        }
 
     }
 
