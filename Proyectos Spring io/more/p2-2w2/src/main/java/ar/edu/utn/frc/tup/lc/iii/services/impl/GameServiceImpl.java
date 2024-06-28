@@ -112,8 +112,7 @@ public class GameServiceImpl implements GameService {
         // 3. If the result exists, update the result with the given data and save it
         // 4. Calculate the score of the predictions of the game calling the method this.calculateScore(gameResult)
         // 5. Return the result
-
-
+        
 
         return null;
     }
