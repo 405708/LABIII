@@ -1,6 +1,6 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Dtos.Common.ErrorApi;
+import com.example.demo.dtos.Common.ErrorApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

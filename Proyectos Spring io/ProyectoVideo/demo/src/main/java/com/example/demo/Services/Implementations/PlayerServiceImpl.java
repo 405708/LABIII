@@ -2,14 +2,17 @@ package com.example.demo.Services.Implementations;
 
 import com.example.demo.Controllers.PlayerController;
 import com.example.demo.Entities.PlayerEntity;
+import com.example.demo.Models.Match;
 import com.example.demo.Models.Player;
 import com.example.demo.Repositories.PlayerJpaRepository;
+import com.example.demo.Services.MatchService;
 import com.example.demo.Services.PlayerService;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -44,4 +47,35 @@ public class PlayerServiceImpl implements PlayerService {
         }
         else return null;
     }
+
+    @Override
+    public Player getPlayerByUserNameAndPassword(String userName, String password) {
+        Optional<PlayerEntity> playerEntityOptional = playerJpaRepository.findByUsernameAndPassword(userName, password);
+        if(playerEntityOptional.isPresent())
+        {
+            return modelMapper.map(playerEntityOptional.get(), Player.class);
+        }
+        else throw new EntityNotFoundException("Username o Password invalida");
+    }
+
+    @Override
+    public Player getPlayerByEmailAndPassword(String email, String password) {
+        Optional<PlayerEntity> playerEntityOptional = playerJpaRepository.findByEmailAndPassword(email, password);
+        if(playerEntityOptional.isPresent())
+        {
+            return modelMapper.map(playerEntityOptional.get(), Player.class);
+        }
+        else throw new EntityNotFoundException("Email o Password invalida");
+    }
+
+    @Override
+    public Player getPlayerByEmailOrUsernameAndPassword(String identity, String password) {
+        Optional<PlayerEntity> playerEntityOptional = playerJpaRepository.findByUsernameOrEmailAndPassword(identity, password);
+        if(playerEntityOptional.isPresent())
+        {
+            return modelMapper.map(playerEntityOptional.get(), Player.class);
+        }
+        else throw new EntityNotFoundException("Email/Usuario o Password invalida");
+    }
+
 }

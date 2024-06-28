@@ -1,7 +1,8 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Dtos.Common.ErrorApi;
-import com.example.demo.Entities.PlayerEntity;
+import com.example.demo.Models.Match;
+import com.example.demo.Services.MatchService;
+import com.example.demo.dtos.Common.ErrorApi;
 import com.example.demo.Models.Player;
 import com.example.demo.Services.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -24,6 +26,8 @@ public class PlayerController {
 
     @Autowired
     private PlayerService playerService;
+    @Autowired
+    private MatchService matchService;
 
     @Operation(
             summary = "Traer un Player por ID",
@@ -66,6 +70,13 @@ public class PlayerController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username o email ya existe");
         }
         else return ResponseEntity.ok(playerSaved);
+    }
+
+    @GetMapping("/{id}/matches")
+    public ResponseEntity<List<Match>> getMatchesOfPlayer(@PathVariable Long id)
+    {
+        List<Match> matches = matchService.getMatchByPlayer(id);
+        return ResponseEntity.ok(matches);
     }
 
 }

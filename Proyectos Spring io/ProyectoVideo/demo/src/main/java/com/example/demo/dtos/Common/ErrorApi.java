@@ -1,4 +1,4 @@
-package com.example.demo.Dtos.Common;
+package com.example.demo.dtos.Common;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
